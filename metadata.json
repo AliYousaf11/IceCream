@@ -1,0 +1,6 @@
+{
+  "name": "Product & Employee Distribution System",
+  "description": "Ice Cream Store distribution ERP with MongoDB persistence, mobile-number authentication, stock assignment, return reconciliation, and financial shortage ledger.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
