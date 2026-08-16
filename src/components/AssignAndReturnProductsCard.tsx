@@ -237,7 +237,7 @@ export const AssignAndReturnProductsCard: React.FC<AssignAndReturnProductsCardPr
           }`}
         >
           <Send className={`w-4 h-4 ${activeWorkflowTab === 'assign' ? 'text-white' : 'text-[#1e40af]'}`} />
-          <span>1. Assign Stock</span>
+          <span>Assign Stock</span>
         </button>
         <button
           type="button"
@@ -249,7 +249,7 @@ export const AssignAndReturnProductsCard: React.FC<AssignAndReturnProductsCardPr
           }`}
         >
           <RotateCcw className={`w-4 h-4 ${activeWorkflowTab === 'return' ? 'text-amber-300' : 'text-amber-600'}`} />
-          <span>2. Return & Settle Cash</span>
+          <span>Return Stock</span>
         </button>
       </div>
 
@@ -371,7 +371,7 @@ export const AssignAndReturnProductsCard: React.FC<AssignAndReturnProductsCardPr
                 disabled={employees.length === 0 || assignTotals.totalQty === 0}
                 leftIcon={<CheckCircle2 className="w-4 h-4 text-amber-300" />}
               >
-                Confirm & Dispatch to Staff
+                Confirm & Assign
               </Button>
             </div>
           </div>

@@ -305,9 +305,10 @@ export const ProductsCard: React.FC<ProductsCardProps> = ({
                     <span className="font-bold text-blue-950">Rs. {p.salePrice}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] text-slate-500 block">Unit Margin</span>
+                    <span className="text-[10px] text-slate-500 block">Purchase Price</span>
                     <span className={`font-bold ${margin >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
-                      Rs. {margin}
+                      Rs. 
+                      {p.purchasePrice.toLocaleString()}
                     </span>
                   </div>
                 </div>

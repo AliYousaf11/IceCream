@@ -44,10 +44,10 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const navItems: Array<{ id: ActiveTab; label: string; icon: React.ReactNode; count?: number }> = [
     { id: 'products', label: 'Products Stock', icon: <Package className="w-4 h-4" />, count: productsCount },
-    { id: 'employees', label: 'Staff Directory', icon: <Users className="w-4 h-4" />, count: employeesCount },
+    { id: 'employees', label: 'Employees', icon: <Users className="w-4 h-4" />, count: employeesCount },
     {
       id: 'dispatch',
-      label: 'Dispatch & Return',
+      label: 'Assign & Return',
       icon: <Send className="w-4 h-4" />,
       count: unsettledDispatchCount > 0 ? unsettledDispatchCount : undefined,
     },
