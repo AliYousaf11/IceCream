@@ -8,10 +8,10 @@ import {
   LogOut,
   User as UserIcon,
   LogIn,
-  IceCream,
 } from 'lucide-react';
 import { ActiveTab, User } from '../types';
 import { Button } from './common/Button';
+import { BrandLogo } from './common/BrandLogo';
 
 export interface NavbarProps {
   activeTab: ActiveTab;
@@ -60,9 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="flex items-center justify-between h-16 sm:h-18">
           {/* Logo & Brand */}
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-900/80 border border-blue-700/50 text-white flex items-center justify-center shadow-xs shrink-0">
-              <IceCream className="w-5 h-5 text-amber-300" />
-            </div>
+            <BrandLogo size="sm" />
             <div>
               <div className="flex items-center space-x-2">
                 <span className="text-base sm:text-lg font-black text-white tracking-tight">

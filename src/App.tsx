@@ -13,6 +13,13 @@ import { LedgerTableCard } from './components/LedgerTableCard';
 import { AuthScreen } from './components/auth/AuthScreen';
 import { ConfirmDialog } from './components/common/ConfirmDialog';
 import { ToastContainer } from './components/common/ToastContainer';
+import { GlobalLoader } from './components/common/GlobalLoader';
+import {
+  ProductsPageSkeleton,
+  EmployeesPageSkeleton,
+  DispatchPageSkeleton,
+  LedgerPageSkeleton,
+} from './components/common/Skeleton';
 
 export function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('products');
@@ -41,6 +48,7 @@ export function App() {
     recordRecovery,
     deleteLedgerEntry,
     resetData,
+    isLoading,
   } = useAppData(addToast, user?.id);
 
   // Count active unsettled dispatches
@@ -99,14 +107,8 @@ export function App() {
     });
   };
 
-  // Auth Loading Splash
   if (isAuthLoading) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center text-white">
-        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-sm font-medium text-slate-400">Loading Ice Cream Store...</p>
-      </div>
-    );
+    return <GlobalLoader message="Loading Ice Cream Store..." />;
   }
 
   // Not Logged In -> Show Dedicated Auth Screen
@@ -151,8 +153,12 @@ export function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Tab Views */}
-        {activeTab === 'products' && (
+        {isLoading && activeTab === 'products' && <ProductsPageSkeleton />}
+        {isLoading && activeTab === 'employees' && <EmployeesPageSkeleton />}
+        {isLoading && activeTab === 'dispatch' && <DispatchPageSkeleton />}
+        {isLoading && activeTab === 'ledger' && <LedgerPageSkeleton />}
+
+        {!isLoading && activeTab === 'products' && (
           <ProductsCard
             products={products}
             onAddProduct={addProduct}
@@ -162,7 +168,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'employees' && (
+        {!isLoading && activeTab === 'employees' && (
           <EmployeesCard
             employees={employees}
             onAddEmployee={addEmployee}
@@ -171,7 +177,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'dispatch' && (
+        {!isLoading && activeTab === 'dispatch' && (
           <AssignAndReturnProductsCard
             products={products}
             employees={employees}
@@ -181,7 +187,7 @@ export function App() {
           />
         )}
 
-        {activeTab === 'ledger' && (
+        {!isLoading && activeTab === 'ledger' && (
           <LedgerTableCard
             ledger={ledger}
             employees={employees}

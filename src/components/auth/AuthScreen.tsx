@@ -3,7 +3,6 @@ import {
   Phone,
   Lock,
   User as UserIcon,
-  IceCream,
   Eye,
   EyeOff,
   ShieldCheck,
@@ -16,6 +15,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Button } from '../common/Button';
+import { BrandLogo } from '../common/BrandLogo';
 
 export interface AuthScreenProps {
   onSignIn: (data: { phone: string; password: string }) => Promise<any>;
@@ -102,11 +102,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({ onSignIn, onSignUp }) =>
             {/* Brand Title & Hero Typography */}
             <div>
               <div className="flex items-center justify-center lg:justify-start space-x-3.5 mb-3">
-                <div className="w-13 h-13 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-600 to-amber-500 p-[1.5px] shadow-xl shadow-blue-950/50">
-                  <div className="w-full h-full bg-[#0b142b] rounded-2xl flex items-center justify-center">
-                    <IceCream className="w-7 h-7 text-amber-300 animate-pulse" />
-                  </div>
-                </div>
+                <BrandLogo size="lg" pulse />
                 <div>
                   <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-none">
                     Ice Cream Store
