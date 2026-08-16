@@ -1,6 +1,6 @@
 import express from 'express';
 import { MongoClient, Db } from 'mongodb';
-import { hashPassword, verifyPassword, normalizePhone, generateToken, SafeUser, DbUser } from './authUtils';
+import { hashPassword, verifyPassword, normalizePhone, generateToken, SafeUser, DbUser } from './authUtils.js';
 
 const DEFAULT_MONGO_URI =
   process.env.MONGODB_URI ||
