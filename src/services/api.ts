@@ -7,9 +7,16 @@ import {
 } from '../types';
 
 const TOKEN_KEY = 'omoor_auth_token';
+const API_BASE = (import.meta.env.VITE_API_URL || '')
+  .replace(/\/$/, '')
+  .replace(/\/api$/, '');
 
 class ApiService {
   private inFlightGetRequests: Map<string, Promise<any>> = new Map();
+
+  private resolveUrl(endpoint: string): string {
+    return `${API_BASE}${endpoint}`;
+  }
 
   private getAuthToken(): string | null {
     try {
@@ -60,7 +67,7 @@ class ApiService {
 
       const fetchPromise = (async () => {
         try {
-          const res = await fetch(endpoint, config);
+          const res = await fetch(this.resolveUrl(endpoint), config);
           if (!res.ok) {
             const errData = await res.json().catch(() => ({}));
             throw new Error(errData.error || `HTTP error! status: ${res.status}`);
@@ -76,7 +83,7 @@ class ApiService {
     }
 
     // For POST/PUT/DELETE:
-    const res = await fetch(endpoint, config);
+    const res = await fetch(this.resolveUrl(endpoint), config);
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
       throw new Error(errData.error || `HTTP error! status: ${res.status}`);
