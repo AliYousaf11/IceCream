@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts"
+    "dev": "tsx server.ts",
+    "start": "tsx server.ts"
   },
   "dependencies": {
     "dotenv": "^17.2.3",

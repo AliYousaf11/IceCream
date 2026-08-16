@@ -1,6 +1,6 @@
 import express from 'express';
 import { MongoClient, Db } from 'mongodb';
-import { hashPassword, verifyPassword, normalizePhone, generateToken, SafeUser, DbUser } from './authUtils.js';
+import { hashPassword, verifyPassword, normalizePhone, generateToken, SafeUser, DbUser } from './authUtils';
 
 const DEFAULT_MONGO_URI =
   process.env.MONGODB_URI ||
@@ -95,8 +95,12 @@ export const app = express();
 app.use(express.json());
 applyCors(app);
 
-getDatabase().catch((err) => {
-  console.warn('[MongoDB] Initial connection attempt failed:', err);
+app.get('/', (_req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'omore-backend',
+    health: '/api/health',
+  });
 });
 
 app.get('/api/health', async (_req, res) => {
@@ -874,6 +878,13 @@ app.delete('/api/dispatches/:id', async (req, res) => {
   } catch (err) {
     console.error('[MongoDB] Delete dispatch error:', err);
     res.status(500).json({ error: 'Failed to delete dispatch' });
+  }
+});
+
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('[API] Unhandled error:', err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
