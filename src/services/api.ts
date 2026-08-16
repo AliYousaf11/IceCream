@@ -191,11 +191,23 @@ class ApiService {
     employeeId: string;
     date?: string;
     items: Array<{ productId: string; assignedQty: number; salePrice?: number }>;
-  }): Promise<DispatchAssignment> {
-    return this.request<DispatchAssignment>('/api/dispatches', {
+  }): Promise<{ dispatch: DispatchAssignment; products: Product[] }> {
+    const payload = await this.request<any>('/api/dispatches', {
       method: 'POST',
       body: JSON.stringify(data),
     });
+
+    if (payload && payload.dispatch) {
+      return {
+        dispatch: payload.dispatch,
+        products: payload.products || [],
+      };
+    }
+
+    return {
+      dispatch: payload as DispatchAssignment,
+      products: [],
+    };
   }
 
   public async settleDispatch(

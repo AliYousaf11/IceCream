@@ -1,6 +1,38 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Product, Employee, LedgerEntry, DispatchAssignment } from '../types';
 import { api } from '../services/api';
+
+function getOutstandingAssignedByProduct(dispatches: DispatchAssignment[]): Map<string, number> {
+  const outstanding = new Map<string, number>();
+
+  for (const dispatch of dispatches) {
+    const status = String(dispatch?.status || 'DRAFT').toUpperCase();
+    if (status === 'SETTLED') continue;
+
+    for (const item of dispatch.items || []) {
+      const productId = String(item.productId || '');
+      const assignedQty = Math.max(0, Number(item.assignedQty) || 0);
+      if (!productId || assignedQty === 0) continue;
+      outstanding.set(productId, (outstanding.get(productId) || 0) + assignedQty);
+    }
+  }
+
+  return outstanding;
+}
+
+function withRemainingStock(products: Product[], dispatches: DispatchAssignment[]): Product[] {
+  const outstanding = getOutstandingAssignedByProduct(dispatches);
+  if (outstanding.size === 0) return products;
+
+  return products.map((product) => {
+    const assignedQty = outstanding.get(String(product.id)) || 0;
+    if (!assignedQty) return product;
+    return {
+      ...product,
+      quantity: Math.max(0, (Number(product.quantity) || 0) - assignedQty),
+    };
+  });
+}
 
 export function useAppData(
   addToast: (msg: string, type?: 'success' | 'error' | 'info') => void,
@@ -69,7 +101,13 @@ export function useAppData(
 
   const handleUpdateProduct = async (id: string, updates: Partial<Product>) => {
     try {
-      const updated = await api.updateProduct(id, updates);
+      const payload: Partial<Product> = { ...updates };
+      if (updates.quantity !== undefined) {
+        const outstanding = getOutstandingAssignedByProduct(dispatches).get(String(id)) || 0;
+        payload.quantity = Math.max(0, Number(updates.quantity) || 0) + outstanding;
+      }
+
+      const updated = await api.updateProduct(id, payload);
       setProducts((prev) => prev.map((p) => (p.id === id ? updated : p)));
       addToast(`Updated product "${updated.name}".`, 'success');
       return updated;
@@ -135,8 +173,18 @@ export function useAppData(
     items: Array<{ productId: string; assignedQty: number; salePrice?: number }>;
   }) => {
     try {
-      const newDispatch = await api.createDispatch(data);
-      setDispatches((prev) => [newDispatch, ...prev]);
+      const result = await api.createDispatch(data);
+      const newDispatch = result?.dispatch;
+
+      if (!newDispatch || !newDispatch.id || !newDispatch.employeeName) {
+        throw new Error('Dispatch was not created successfully.');
+      }
+
+      setDispatches((prev) => [newDispatch, ...prev.filter(Boolean)]);
+      if (result.products && result.products.length > 0) {
+        setProducts(result.products);
+      }
+
       addToast(`Assigned products to ${newDispatch.employeeName} successfully.`, 'success');
       return newDispatch;
     } catch (err: any) {
@@ -210,8 +258,13 @@ export function useAppData(
     }
   };
 
+  const productsWithRemaining = useMemo(
+    () => withRemainingStock(products, dispatches),
+    [products, dispatches]
+  );
+
   return {
-    products,
+    products: productsWithRemaining,
     employees,
     ledger,
     dispatches,

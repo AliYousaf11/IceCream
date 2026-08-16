@@ -53,6 +53,25 @@ export const LedgerTableCard: React.FC<LedgerTableCardProps> = ({
     });
   }, [ledger, selectedEmployeeFilter, typeFilter]);
 
+  const ledgerSummary = useMemo(() => {
+    const totals = filteredLedger.reduce(
+      (acc, entry) => {
+        acc.shortage += entry.shortage;
+        acc.extra += entry.extra;
+        acc.recovery += entry.recovery;
+        return acc;
+      },
+      { shortage: 0, extra: 0, recovery: 0 }
+    );
+
+    const remainingBalance = totals.shortage - totals.extra - totals.recovery;
+
+    return {
+      ...totals,
+      remainingBalance,
+    };
+  }, [filteredLedger]);
+
   // Export to CSV
   const handleExportCSV = () => {
     if (filteredLedger.length === 0) return;
@@ -146,6 +165,31 @@ export const LedgerTableCard: React.FC<LedgerTableCardProps> = ({
             <option value="recovery">Recoveries Only</option>
             <option value="extra">Extras Only</option>
           </Select>
+        </div>
+
+        <div className="p-4 bg-slate-50/70 border-b border-slate-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-rose-700 font-bold">Shortage</div>
+              <div className="mt-1 text-lg font-extrabold text-rose-700">Rs. {ledgerSummary.shortage.toLocaleString()}</div>
+            </div>
+            <div className="rounded-xl border border-blue-200 bg-blue-50 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-blue-700 font-bold">Extra</div>
+              <div className="mt-1 text-lg font-extrabold text-blue-700">Rs. {ledgerSummary.extra.toLocaleString()}</div>
+            </div>
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+              <div className="text-[10px] uppercase tracking-wide text-emerald-700 font-bold">Recovery</div>
+              <div className="mt-1 text-lg font-extrabold text-emerald-700">Rs. {ledgerSummary.recovery.toLocaleString()}</div>
+            </div>
+            <div className={`rounded-xl border p-3 ${ledgerSummary.remainingBalance >= 0 ? 'border-amber-200 bg-amber-50' : 'border-violet-200 bg-violet-50'}`}>
+              <div className={`text-[10px] uppercase tracking-wide font-bold ${ledgerSummary.remainingBalance >= 0 ? 'text-amber-700' : 'text-violet-700'}`}>
+                Remaining Balance
+              </div>
+              <div className={`mt-1 text-lg font-extrabold ${ledgerSummary.remainingBalance >= 0 ? 'text-amber-700' : 'text-violet-700'}`}>
+                Rs. {Math.abs(ledgerSummary.remainingBalance).toLocaleString()}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Desktop Table View */}

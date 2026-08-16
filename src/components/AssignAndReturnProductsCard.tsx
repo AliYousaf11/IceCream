@@ -307,6 +307,8 @@ export const AssignAndReturnProductsCard: React.FC<AssignAndReturnProductsCardPr
                 {products.map((p) => {
                   const qty = assignQuantities[p.id] || 0;
                   const itemTotal = qty * p.salePrice;
+                  const remainingAfterAssign = Math.max(0, p.quantity - qty);
+                  const hasStock = p.quantity > 0;
 
                   return (
                     <div
@@ -320,25 +322,46 @@ export const AssignAndReturnProductsCard: React.FC<AssignAndReturnProductsCardPr
                         <div>
                           <div className="text-xs sm:text-sm font-bold text-slate-900">{p.name}</div>
                           <div className="text-[11px] text-slate-500">
-                            Available: <span className="font-semibold text-slate-700">{p.quantity}</span> | Rate: Rs. {p.salePrice}
+                            Available:{' '}
+                            {hasStock ? (
+                              <span className="font-semibold text-slate-700">{p.quantity}</span>
+                            ) : (
+                              <span className="font-semibold text-rose-600">no stock</span>
+                            )}{' '}
+                            | Remaining after assign:{' '}
+                            {remainingAfterAssign > 0 ? (
+                              <span className="font-semibold text-emerald-700">{remainingAfterAssign}</span>
+                            ) : (
+                              <span className="font-semibold text-rose-600">no stock</span>
+                            )}{' '}
+                            | Rate: Rs. {p.salePrice}
                           </div>
                         </div>
                       </div>
 
                       <div className="flex items-center space-x-3 self-end sm:self-auto">
                         <div className="w-28 sm:w-32">
-                          <Input
-                            type="number"
-                            min="0"
-                            max={p.quantity}
-                            placeholder="0"
-                            value={assignQuantities[p.id] || ''}
-                            onChange={(e) => {
-                              const val = Math.max(0, parseInt(e.target.value, 10) || 0);
-                              setAssignQuantities((prev) => ({ ...prev, [p.id]: val }));
-                            }}
-                            className="text-right font-mono"
-                          />
+                          {hasStock ? (
+                            <Input
+                              type="number"
+                              min="0"
+                              max={p.quantity}
+                              placeholder="0"
+                              value={assignQuantities[p.id] || ''}
+                              onChange={(e) => {
+                                const val = Math.max(0, parseInt(e.target.value, 10) || 0);
+                                setAssignQuantities((prev) => ({ ...prev, [p.id]: val }));
+                              }}
+                              className="text-right font-mono"
+                            />
+                          ) : (
+                            <Input
+                              type="text"
+                              value="no stock"
+                              disabled
+                              className="text-right font-semibold text-rose-600"
+                            />
+                          )}
                         </div>
                         <div className="w-28 text-right font-mono text-xs font-bold text-blue-950">
                           Rs. {itemTotal.toLocaleString()}

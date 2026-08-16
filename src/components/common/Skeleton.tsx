@@ -6,8 +6,8 @@ export const Skeleton: React.FC<{ className?: string }> = ({ className = '' }) =
 
 const TableHeader: React.FC<{ columns: string[] }> = ({ columns }) => (
   <div className="hidden md:grid border-b border-slate-200 bg-slate-100/60 px-5 py-3.5 grid-cols-12 gap-3">
-    {columns.map((col) => (
-      <div key={col} className={col}>
+    {columns.map((col, index) => (
+      <div key={`${col}-${index}`} className={col}>
         <Skeleton className="h-2.5 w-16 rounded" />
       </div>
     ))}

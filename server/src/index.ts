@@ -51,7 +51,10 @@ async function getDatabase(): Promise<Db | null> {
 function sanitizeDoc(doc: any) {
   if (!doc) return doc;
   const { _id, passwordHash, salt, ...rest } = doc;
-  return rest;
+  return {
+    ...rest,
+    id: rest.id || (_id ? String(_id) : undefined),
+  };
 }
 
 function sanitizeDocs(docs: any[]) {
@@ -636,6 +639,14 @@ app.post('/api/dispatches', async (req, res) => {
     const totalReturnPrice = processedItems.reduce((acc: number, cur: any) => acc + cur.totalReturnPrice, 0);
     const expectedCash = totalAssignPrice - totalReturnPrice;
 
+    const userScope = userId ? { $or: [{ userId }, { userId: { $exists: false } }] } : {};
+    let currentProducts: any[] = [];
+    if (db) {
+      currentProducts = sanitizeDocs(await db.collection('products').find(userScope).sort({ createdAt: -1 }).toArray());
+    } else {
+      currentProducts = fallbackProducts.filter((p: any) => !userId || p.userId === userId || !p.userId);
+    }
+
     const newDispatch = {
       id: 'd-' + Date.now(),
       userId: userId || 'default',
@@ -658,7 +669,11 @@ app.post('/api/dispatches', async (req, res) => {
     }
 
     fallbackDispatches.push(newDispatch);
-    res.status(201).json(sanitizeDoc(newDispatch));
+
+    res.status(201).json({
+      dispatch: sanitizeDoc(newDispatch),
+      products: sanitizeDocs(currentProducts),
+    });
   } catch (err) {
     console.error('[API] /api/dispatches error:', err);
     res.status(500).json({ error: 'Failed to create dispatch assignment' });
@@ -776,8 +791,8 @@ app.post('/api/dispatches/:id/settle', async (req, res) => {
     }
 
     dispatch.items.forEach((item: any) => {
-      const prod = fallbackProducts.find((p: any) => p.id === item.productId);
-      if (prod) {
+      const prod = fallbackProducts.find((p: any) => p.id === item.productId && (!userId || p.userId === userId || !p.userId));
+      if (prod && item.netSoldQty > 0) {
         prod.quantity = Math.max(0, prod.quantity - item.netSoldQty);
       }
     });

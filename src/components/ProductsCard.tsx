@@ -194,7 +194,8 @@ export const ProductsCard: React.FC<ProductsCardProps> = ({
             <tbody className="divide-y divide-slate-200/80 text-xs sm:text-sm">
               {filteredProducts.map((p) => {
                 const margin = p.salePrice - p.purchasePrice;
-                const isLowStock = p.quantity < 50;
+                const hasStock = p.quantity > 0;
+                const isLowStock = hasStock && p.quantity < 50;
 
                 return (
                   <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
@@ -211,9 +212,13 @@ export const ProductsCard: React.FC<ProductsCardProps> = ({
                     </td>
                     <td className="py-3.5 px-5 text-right font-medium">
                       <div className="inline-flex items-center space-x-1.5">
-                        <span className="font-bold text-slate-900">
-                          {p.quantity.toLocaleString()}
-                        </span>
+                        {hasStock ? (
+                          <span className="font-bold text-slate-900">
+                            {p.quantity.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="font-semibold text-rose-600">no stock</span>
+                        )}
                         {isLowStock && (
                           <Badge variant="danger" size="sm">
                             Low
@@ -263,7 +268,7 @@ export const ProductsCard: React.FC<ProductsCardProps> = ({
         <div className="md:hidden divide-y divide-slate-200">
           {filteredProducts.map((p) => {
             const margin = p.salePrice - p.purchasePrice;
-            const isLowStock = p.quantity < 50;
+            const hasStock = p.quantity > 0;
 
             return (
               <div key={p.id} className="p-4 space-y-3">
@@ -298,7 +303,9 @@ export const ProductsCard: React.FC<ProductsCardProps> = ({
                 <div className="grid grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl text-center text-xs">
                   <div>
                     <span className="text-[10px] text-slate-500 block">Stock Qty</span>
-                    <span className="font-bold text-slate-900">{p.quantity.toLocaleString()}</span>
+                    <span className={`font-bold ${hasStock ? 'text-slate-900' : 'text-rose-600'}`}>
+                      {hasStock ? p.quantity.toLocaleString() : 'no stock'}
+                    </span>
                   </div>
                   <div>
                     <span className="text-[10px] text-slate-500 block">Sale Price</span>
