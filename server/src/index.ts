@@ -68,23 +68,48 @@ function getBearerToken(req: express.Request): string | null {
   return parts.length === 2 && parts[0].toLowerCase() === 'bearer' ? parts[1] : null;
 }
 
+function normalizeOrigin(origin: string): string {
+  return origin.trim().replace(/\/$/, '');
+}
+
+function getAllowedOrigins(): string[] {
+  return [...new Set(
+    (process.env.FRONTEND_URL || '')
+      .split(',')
+      .map(normalizeOrigin)
+      .filter(Boolean)
+  )];
+}
+
+function isAllowedOrigin(origin: string | undefined, allowed: string[]): boolean {
+  if (!origin) return false;
+  const normalized = normalizeOrigin(origin);
+  if (allowed.includes('*') || allowed.includes(normalized)) return true;
+  try {
+    const { hostname } = new URL(normalized);
+    if (hostname === 'icecream-walls.vercel.app') return true;
+    if (hostname.endsWith('.vercel.app') && hostname.startsWith('icecream-walls-')) return true;
+  } catch {
+    // ignore invalid origin
+  }
+  return false;
+}
+
 function applyCors(app: express.Express) {
   app.use((req, res, next) => {
     const requestOrigin = req.headers.origin;
-    const allowed = (process.env.FRONTEND_URL || '')
-      .split(',')
-      .map((value) => value.trim())
-      .filter(Boolean);
+    const allowed = getAllowedOrigins();
 
-    if (requestOrigin && (allowed.length === 0 || allowed.includes('*') || allowed.includes(requestOrigin))) {
+    if (requestOrigin && isAllowedOrigin(requestOrigin, allowed)) {
       res.header('Access-Control-Allow-Origin', requestOrigin);
       res.header('Vary', 'Origin');
-    } else if (!requestOrigin && (allowed.length === 0 || allowed.includes('*'))) {
+    } else if (!requestOrigin) {
       res.header('Access-Control-Allow-Origin', '*');
     }
 
     res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Max-Age', '86400');
 
     if (req.method === 'OPTIONS') {
       return res.sendStatus(204);
@@ -95,8 +120,8 @@ function applyCors(app: express.Express) {
 
 export const app = express();
 
-app.use(express.json());
 applyCors(app);
+app.use(express.json());
 
 app.get('/', (_req, res) => {
   res.json({
